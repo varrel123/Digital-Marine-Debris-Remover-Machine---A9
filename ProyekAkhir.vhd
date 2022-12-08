@@ -4,7 +4,7 @@ USE ieee.numeric_std.ALL;
 
 ENTITY ProyekAkhir IS
     PORT (
-        -- INput
+        -- Input
         M : IN STD_LOGIC; --ON/OFF untuk menyalakan atau mematikan mesin
         CLK : IN STD_LOGIC; -- CLOCK
         Sen : IN STD_LOGIC; -- Sensor
@@ -12,7 +12,11 @@ ENTITY ProyekAkhir IS
         H : IN STD_LOGIC;
 
         -- Output
-        Sampah : OUT STD_LOGIC
+
+        Sampah : OUT STD_LOGIC;
+        trig : OUT STD_LOGIC; 
+        cm1 : OUT unsigned(3 DOWNTO 0);
+        cm0 : OUT unsigned(3 DOWNTO 0)
     );
 END ENTITY ProyekAkhir;
 
@@ -28,12 +32,17 @@ ARCHITECTURE ProyekAkhir_arch OF ProyekAkhir IS
             trig : OUT STD_LOGIC; --trigger
             cm1 : OUT unsigned(3 DOWNTO 0); -- MSB pertama distance di binary form
             cm0 : OUT unsigned(3 DOWNTO 0)); -- MSB pertama distance di binary form
-    END COMPONENT;
+end COMPONENT;
 
     TYPE states IS (S0, S1, S2, S3, S4, S5); -- STATE
     SIGNAL NS, PS : states; -- NextState dan PresentState
 
 BEGIN
+
+    sensor1 : Sensor port map (
+        clk, Sen, trig, cm1, cm0
+    );
+    
     -- Synchronous process berfungsi untuk melakukan 
     -- Perubahan pada next state dan clock
     sync_proc : PROCESS (CLK, NS)
@@ -107,7 +116,7 @@ BEGIN
             WHEN S4 =>
                 IF (H = '1') THEN
                     NS <= S0;
-            
+                
             END IF;
 
             WHEN S5 =>
