@@ -5,22 +5,20 @@ USE ieee.numeric_std.ALL;
 ENTITY ProyekAkhir IS
     PORT (
         -- Input
-        M : IN STD_LOGIC; --ON/OFF untuk menyalakan atau mematikan mesin
+        M   : IN STD_LOGIC; --ON/OFF untuk menyalakan atau mematikan mesin
         CLK : IN STD_LOGIC; -- CLOCK
         Sen : IN STD_LOGIC; -- Sensor
-        D : IN STD_LOGIC_VECTOR(1 DOWNTO 0); -- Arah
-        H : IN STD_LOGIC;
+        D   : IN STD_LOGIC_VECTOR(1 DOWNTO 0); -- Arah
+        H   : IN STD_LOGIC; -- Kial dengan jaring
 
         -- Output
-
-        Sampah : OUT STD_LOGIC;
-        trig : OUT STD_LOGIC; 
-        cm1 : OUT unsigned(3 DOWNTO 0);
-        cm0 : OUT unsigned(3 DOWNTO 0)
+        Sampah  : OUT STD_LOGIC; -- Sampah
+        Lamp    : OUT STD_LOGIC; -- Lampu Led untuk arah
+        Alarm    : OUT STD_LOGIC_VECTOR(1 downto 0)  -- Bel alarm untuk Kail
     );
 END ENTITY ProyekAkhir;
 
-ARCHITECTURE ProyekAkhir_arch OF ProyekAkhir IS
+ARCHITECTURE flow OF ProyekAkhir IS
 
     COMPONENT Sensor IS
         PORT (
@@ -29,9 +27,8 @@ ARCHITECTURE ProyekAkhir_arch OF ProyekAkhir IS
             echo : IN STD_LOGIC;
 
             -- Output
-            trig : OUT STD_LOGIC; --trigger
-            cm1 : OUT unsigned(3 DOWNTO 0); -- MSB pertama distance di binary form
-            cm0 : OUT unsigned(3 DOWNTO 0)); -- MSB pertama distance di binary form
+            Detec : OUT STD_LOGIC --trigger
+        );
 end COMPONENT;
 
     TYPE states IS (S0, S1, S2, S3, S4, S5); -- STATE
@@ -39,10 +36,13 @@ end COMPONENT;
 
 BEGIN
 
-    sensor1 : Sensor port map (
-        clk, Sen, trig, cm1, cm0
+    -- Instansiasi Sensor
+    sensorsampah : Sensor PORT MAP(
+        echo => Sen, 
+        Detec => Sampah,
+        clk => CLK
     );
-    
+
     -- Synchronous process berfungsi untuk melakukan 
     -- Perubahan pada next state dan clock
     sync_proc : PROCESS (CLK, NS)
@@ -54,7 +54,7 @@ BEGIN
 
     -- comb_proc akan menjalankan fungsi utama program
     -- seperti kail,sensor,arah,dan menyalakan atau matikan mesin
-    comb_proc : PROCESS (PS, M, D, Sen)
+    comb_proc : PROCESS (PS, M, D, H, Sen)
     BEGIN
         Sampah <= '0';
 
@@ -72,9 +72,9 @@ BEGIN
                 -- Inputnya adalah D    
             WHEN S1 =>
                 Sampah <= '0';
-                IF (D = "01") THEN
+                IF (D = "00") THEN
                     NS <= S2;
-                ELSIF (D = "00") THEN
+                ELSIF (D = "01") THEN
                     NS <= S2;
                 ELSIF (D = "10") THEN
                     NS <= S2;
@@ -88,9 +88,9 @@ BEGIN
                 -- Inputnya adalah D
             WHEN S2 =>
                 Sampah <= '0';
-                IF (D = "01") THEN
+                IF (D = "00") THEN
                     NS <= S2;
-                ELSIF (D = "00") THEN
+                ELSIF (D = "01") THEN
                     NS <= S2;
                 ELSIF (D = "10") THEN
                     NS <= S2;
@@ -106,22 +106,23 @@ BEGIN
             WHEN S3 =>
                 IF (Sen = '1') THEN
                     NS <= S4;
+                    Sampah <= Sen;
                 ELSIF (Sen = '0') THEN
                     NS <= S3;
                 ELSE
                     NS <= S5;
                 END IF;
 
-                -- S4 berfungsi mekanisme gerak sensor
+                -- S4 berfungsi untuk menaikkan kail
             WHEN S4 =>
-                IF (H = '1') THEN
+                IF (H = '0') THEN
                     NS <= S0;
-                
-            END IF;
+                END IF;
 
             WHEN S5 =>
                 NS <= S0; -- error handling
+
         END CASE;
     END PROCESS;
 
-END ARCHITECTURE ProyekAkhir_arch;
+END ARCHITECTURE flow;
