@@ -5,16 +5,16 @@ USE ieee.numeric_std.ALL;
 ENTITY ProyekAkhir IS
     PORT (
         -- Input
-        M   : IN STD_LOGIC; --ON/OFF untuk menyalakan atau mematikan mesin
+        M   : IN STD_LOGIC; --ON/OFF to turn on or turn off the machine
         CLK : IN STD_LOGIC; -- CLOCK
         Sen : IN STD_LOGIC; -- Sensor
-        D   : IN STD_LOGIC_VECTOR (1 DOWNTO 0); -- Arah
-        H   : IN STD_LOGIC; -- Kail dengan jaring
+        D   : IN STD_LOGIC_VECTOR (1 DOWNTO 0); -- Direction
+        H   : IN STD_LOGIC; -- Hook with net
 
         -- Output
-        Sampah  : OUT STD_LOGIC; -- Sampah
-        Lamp    : OUT STD_LOGIC; -- Lampu Led untuk arah
-        Alarm   : OUT STD_LOGIC  -- Bel alarm untuk Kail
+        Sampah  : OUT STD_LOGIC; -- The debris
+        Lamp    : OUT STD_LOGIC; -- Led light for direction
+        Alarm   : OUT STD_LOGIC  -- Alarm bells for Hook
     );
 END ENTITY ProyekAkhir;
 
@@ -23,118 +23,116 @@ ARCHITECTURE behavioral OF ProyekAkhir IS
     COMPONENT Sensor Is
         PORT (
             -- Input
-            clk : IN STD_LOGIC; --clock
-            echo : IN STD_LOGIC; --
+            clk : IN STD_LOGIC; -- Clock
+            echo : IN STD_LOGIC; -- Echo
 
             -- Output
-            trig : OUT STD_LOGIC --trigger
+            trig : OUT STD_LOGIC -- Trigger
         );
 end COMPONENT;
 
-    TYPE states IS (S0, S1, S2, S3, S4, S5); -- STATE
-    SIGNAL NS, PS : states; -- NextState dan PresentState
+    TYPE state_types IS (S0, S1, S2, S3, S4, S5); -- STATE
+    SIGNAL next_state, present_state: state_types; -- NextState dan PresentState
+    SIGNAL detect : STD_LOGIC; -- Detect for sensors
 
 BEGIN
 
-    -- Instansiasi Sensor
+    -- Sensor Instantiation
     sensorsampah : Sensor PORT MAP(
         echo => Sen, 
         clk => CLK,
-        trig => Sampah
+        trig => detect
     );
 
-    -- Synchronous process berfungsi untuk melakukan 
-    -- Perubahan pada next state dan clock
-    sync_proc : PROCESS (CLK, NS)
+    -- Synchronous process function to perform Changes to the next state and clock
+    sync_proc : PROCESS (CLK, next_state)
     BEGIN
         IF (rising_edge(CLK)) THEN
-            PS <= NS;
+            present_state <= next_state;
         END IF;
-    END PROCESS;
+    end process sync_proc;
 
-    -- comb_proc akan menjalankan fungsi utama program
-    -- seperti kail, sensor, arah, dan menyalakan atau matikan mesin
-    comb_proc : PROCESS (PS, M, D, H, Sen)
+    -- comb_proc will run the main function of the program
+    -- such as hooks, sensors, directions, and starting or stopping the engine
+    comb_proc : PROCESS (present_state, M, D, H, Sen)
     BEGIN
 
-        CASE PS IS
-                -- S0 berfungsi untuk menyalakan dan matikan mesin
-                -- dengan input M
+        CASE present_state IS
+            -- S0 functions to turn on and turn off the machine with M input
             WHEN S0 =>
-                Sampah <= Sen;
                 IF (M = '1') THEN
-                    NS <= S1;
+                    next_state <= S1;
                 ELSIF (M = '0') THEN
-                    NS <= S0;   
+                    next_state <= S0;   
                 END IF;
 
-                -- S1 berfungsi untuk menentukan arah sama seperti S2
-                -- Inputnya adalah D    
+            -- S1 functions to determine the same direction as S2 with the input being D
             WHEN S1 =>
-                Sampah <= Sen;
                 IF (D = "00") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSIF (D = "01") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSIF (D = "10") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSIF (D = "11") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSE
-                    NS <= S5;
+                    next_state <= S5;
                 END IF;
 
-                -- S2 berfungsi untuk menentukan arah sama seperti S1
-                -- Inputnya adalah D
+            -- S2 functions to determine the same direction as S1 with the input being D
             WHEN S2 =>
-                Sampah <= Sen;
                 IF (D = "00") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSIF (D = "01") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSIF (D = "10") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 ELSIF (D = "11") THEN
-                    NS <= S2;
+                    next_state <= S2;
                 END IF;
 
                 IF (Sen = '0' and H = '1') THEN
-                    NS <= S3;
+                    next_state <= S3;
                     Sampah <= Sen;
                 ELSE
-                    NS <= S5;
+                    next_state <= S5;
                 END IF;
 
-                -- S3 berfungsi sebagai checker untuk Sensor    
+            -- S3 functions to determine the same direction as S4 with the input being D   
             WHEN S3 =>
-                IF (Sen = '1' and H = '1') THEN
-                    Sampah <= Sen;
-                    NS <= S4;
-                ELSIF (Sen = '0' and H = '1') THEN
-                    NS <= S3;
+                IF (Sen = '0' and H = '1') THEN
+                    next_state <= S3;
+                ELSIF (Sen = '1' and H = '1') THEN
+                    detect <= Sen;
+                    next_state <= S4;
                 ELSE
-                    NS <= S5;
+                    next_state <= S5;
                 END IF;
 
-                -- S4 berfungsi untuk menaikkan kail
+            -- S4 serves to raise the hook
             WHEN S4 =>
+            Sampah <= Sen;
                 IF (H = '0') THEN
                 Sampah <= '1';
-                    NS <= S0;
+                    next_state <= S0;
                 END IF;
 
+            -- S5 works for error handling
             WHEN S5 =>
-                NS <= S0; -- error handling
+                next_state <= S0;
 
         END CASE;
     END PROCESS;
 
-    WITH PS SELECT
+    -- The condition of the led light is on only when state 3 and state 4
+    WITH present_state SELECT
         Lamp <= '1' WHEN S3,
                 '1' WHEN S4,
                 '0' WHEN others;
 
-    WITH PS SELECT
+    -- The condition of the led light is on only when state 2 and state 3
+    WITH present_state SELECT
         Alarm <= '1' WHEN S2,
                 '1' WHEN S3,
                 '0' WHEN others;

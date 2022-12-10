@@ -10,19 +10,20 @@ architecture bench of ProyekAkhir_tb is
     component ProyekAkhir is
         port (
             -- Input
-            M   : IN STD_LOGIC; --ON/OFF untuk menyalakan atau mematikan mesin
+            M   : IN STD_LOGIC; --ON/OFF to turn on or turn off the machine
             CLK : IN STD_LOGIC; -- CLOCK
             Sen : IN STD_LOGIC; -- Sensor
-            D   : IN STD_LOGIC_VECTOR(1 DOWNTO 0); -- Arah
-            H   : IN STD_LOGIC; -- Kail dengan jaring
-    
+            D   : IN STD_LOGIC_VECTOR (1 DOWNTO 0); -- Direction
+            H   : IN STD_LOGIC; -- Hook with net
+
             -- Output
-            Sampah  : OUT STD_LOGIC; -- Sampah
-            Lamp    : OUT STD_LOGIC; -- Lampu Led untuk arah
-            Alarm   : OUT STD_LOGIC -- Bel alarm untuk Kail
+            Sampah  : OUT STD_LOGIC; -- The debris
+            Lamp    : OUT STD_LOGIC; -- Led light for direction
+            Alarm   : OUT STD_LOGIC  -- Alarm bells for Kail
         );
     end component;
 
+    -- signal to be used for the testbench
     signal Machine      : STD_LOGIC;
     signal CLK          : STD_LOGIC;
     signal Sensor       : STD_LOGIC;
@@ -31,12 +32,14 @@ architecture bench of ProyekAkhir_tb is
     signal Sampah       : STD_LOGIC;
     signal led          : STD_LOGIC;
     signal buzz         : STD_LOGIC;
-    constant period     : time      := 20 ps;
+    constant period     : time      := 20 ps; --
     signal max_clk      : integer   := 60;
     signal count        : integer   := 0;
 
 begin
 
+    -- The port map statement maps the input and output signals of the component
+    -- to the corresponding signals in the testbench
     testMesin : ProyekAkhir port map (
         M => Machine,
         CLK => CLK,
@@ -52,10 +55,8 @@ begin
         constant led_red      : STD_LOGIC := '0';
         constant led_green    : STD_LOGIC := '1';   
         constant buzz_off     : STD_LOGIC := '0';
-        constant buzz_front   : STD_LOGIC := '1';
-        constant buzz_back    : STD_LOGIC := '1';
-        constant buzz_left    : STD_LOGIC := '1';
-        constant buzz_right   : STD_LOGIC := '1';
+        constant buzz_on      : STD_LOGIC := '1';
+
     begin
         Machine <= '0';
         Sensor <= '0';
@@ -76,7 +77,7 @@ begin
         Hook <= '0';
         Direction <= "00";
         wait for period;
-        assert (buzz = buzz_front)
+        assert (buzz = buzz_on)
             report "Hook to Forward" severity note;
 
         Machine <= '1';
@@ -84,7 +85,7 @@ begin
         Hook <= '0';
         Direction <= "01";
         wait for period;
-        assert (buzz = buzz_back)
+        assert (buzz = buzz_on)
             report "Hook to Back" severity note;
 
         Machine <= '1';
@@ -92,7 +93,7 @@ begin
         Hook <= '0';
         Direction <= "10";
         wait for period;
-        assert (buzz = buzz_left)
+        assert (buzz = buzz_on)
             report "Hook to Left" severity note;
 
         Machine <= '1';
@@ -100,7 +101,7 @@ begin
         Hook <= '0';
         Direction <= "11";
         wait for period;
-        assert (buzz = buzz_right)
+        assert (buzz = buzz_on)
             report "Hook to Right" severity note;
 
         Machine <= '1';
