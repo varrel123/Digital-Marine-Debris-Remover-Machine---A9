@@ -22,8 +22,8 @@ Instruksi ini akan membuat sebuah salinan proyek ini di komputer Anda.
 Hal-hal apa yang perlu diinstall untuk mengoptimalkan simulasi proyek
 
 <!-- OL -->
-1. VHDL compiler (e.g. GHDL)
-2. Simulation tool (e.g. GTKWave)
+1. VHDL compiler (e.g. ModelSim)
+2. Simulation tool (e.g. ModelSim, Quartus)
 
 
 ### Installing
@@ -37,11 +37,11 @@ Panduan untuk menginstal proyek di mesin lokal Anda
 
 Terdapat 5 buah input dan 3 buah output pada proyek ini, inputnya antara lain:
 <!-- UL -->
-* Machine (M)   : Kondisi untuk menyalakan dan mematikan mesin
-* Clock (CLK) : Clock 
-* Sensor (Sen) :  Sensor yang digunakan untuk mendeteksi apakah sampah penuh atau tidak
-* Direction (D)   : Arah gerak dari hook yang digunakan untuk mencari debris
-* Hook (H)   : Kondisi apakah hook dengan net dalam kondisi naik atau turun
+* Machine       : Kondisi untuk menyalakan dan mematikan mesin
+* Clock (CLK)   : Clock 
+* Sensor (Sen)  : Sensor yang digunakan untuk mendeteksi apakah sampah penuh atau tidak
+* Direction     : Arah gerak dari hook yang digunakan untuk mencari debris
+* Hook          : Kondisi apakah hook dengan net dalam kondisi naik atau turun
 
 Sementara itu, outputnya adalah:
 * Sampah  : The debris / Sampah laut yang merupakan output utama
@@ -55,19 +55,14 @@ Sementara itu, outputnya adalah:
 - ModelSim
 - Quartus
 
+## Presentation YouTube link
+
+https://www.youtube.com/watch?v=1N0_GKdwXbw
+
 ## Authors
 
 - Muhammad Fathan Muhandis
 - Mohammad Varrel Bramasta
 - Muhammad Aqil Muzakky
 - Aliefya Fikri Ihsani
-
-
-
-
-
-
-
-
-
 
