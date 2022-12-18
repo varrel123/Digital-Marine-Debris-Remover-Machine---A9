@@ -9,17 +9,17 @@ architecture bench of ProyekAkhir_tb is
 
     component ProyekAkhir is
         port (
-            -- Input
-            M   : IN STD_LOGIC; --ON/OFF to turn on or turn off the machine
-            CLK : IN STD_LOGIC; -- CLOCK
-            Sen : IN STD_LOGIC; -- Sensor
-            D   : IN STD_LOGIC_VECTOR (1 DOWNTO 0); -- Direction
-            H   : IN STD_LOGIC; -- Hook with net
+        -- Input
+        Machine     : IN STD_LOGIC; --ON/OFF to turn on or turn off the machine
+        CLK         : IN STD_LOGIC; -- CLOCK
+        Sen         : IN STD_LOGIC; -- Sensor
+        Direction   : IN STD_LOGIC_VECTOR (2 DOWNTO 0); -- Direction
+        Hook        : IN STD_LOGIC; -- Hook with net
 
-            -- Output
-            Sampah  : OUT STD_LOGIC; -- The debris
-            Lamp    : OUT STD_LOGIC; -- Led light for direction
-            Alarm   : OUT STD_LOGIC  -- Alarm bells for Kail
+        -- Output
+        Sampah  : OUT STD_LOGIC; -- The debris
+        Lamp    : OUT STD_LOGIC; -- Led light for direction
+        Alarm   : OUT STD_LOGIC  -- Alarm bells for Hook
         );
     end component;
 
@@ -27,7 +27,7 @@ architecture bench of ProyekAkhir_tb is
     signal Machine      : STD_LOGIC;
     signal CLK          : STD_LOGIC;
     signal Sensor       : STD_LOGIC;
-    signal Direction    : STD_LOGIC_VECTOR (1 downto 0);
+    signal Direction    : STD_LOGIC_VECTOR (2 downto 0);
     signal Hook         : STD_LOGIC;
     signal Sampah       : STD_LOGIC;
     signal led          : STD_LOGIC;
@@ -41,11 +41,11 @@ begin
     -- The port map statement maps the input and output signals of the component
     -- to the corresponding signals in the testbench
     testMesin : ProyekAkhir port map (
-        M => Machine,
+        Machine => Machine,
         CLK => CLK,
         Sen => Sensor,
-        D (1 downto 0) => Direction (1 downto 0),
-        H => Hook,
+        Direction (2 downto 0) => Direction (2 downto 0),
+        Hook => Hook,
         Sampah => Sampah,
         Lamp => Led,
         Alarm => Buzz
@@ -71,19 +71,11 @@ begin
         wait for period;
         assert (led = led_red)
             report "Machine ON!" severity note;
-        
-        Machine <= '1';
-        Sensor <= '0';
-        Hook <= '0';
-        Direction <= "00";
-        wait for period;
-        assert (buzz = buzz_on)
-            report "Hook to Forward" severity note;
 
         Machine <= '1';
         Sensor <= '0';
         Hook <= '0';
-        Direction <= "01";
+        Direction <= "001";
         wait for period;
         assert (buzz = buzz_on)
             report "Hook to Back" severity note;
@@ -91,7 +83,7 @@ begin
         Machine <= '1';
         Sensor <= '0';
         Hook <= '0';
-        Direction <= "10";
+        Direction <= "011";
         wait for period;
         assert (buzz = buzz_on)
             report "Hook to Left" severity note;
@@ -99,13 +91,22 @@ begin
         Machine <= '1';
         Sensor <= '0';
         Hook <= '0';
-        Direction <= "11";
+        Direction <= "101";
         wait for period;
         assert (buzz = buzz_on)
             report "Hook to Right" severity note;
 
         Machine <= '1';
         Sensor <= '0';
+        Hook <= '0';
+        Direction <= "000";
+        wait for period;
+        assert (buzz = buzz_on)
+                report "Hook Stop" severity note;
+
+        Machine <= '1';
+        Sensor <= '0';
+        Hook <= '0';
         wait for period;
         assert (led = led_red)
             report "Hook going down to find debris" severity note;

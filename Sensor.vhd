@@ -9,7 +9,7 @@ ENTITY Sensor IS
         echo : IN STD_LOGIC; -- echo
 
         -- Output
-        trig : OUT STD_LOGIC; -- trigger
+        trigger : OUT STD_LOGIC; -- trigger
         MSB1  : OUT unsigned(3 DOWNTO 0); -- MSB pertama distance di binary form
         MSB0  : OUT unsigned(3 DOWNTO 0)); -- MSB kedua distance di binary form
 END Sensor;
@@ -33,13 +33,13 @@ BEGIN
                 -- If we've reached 10 us of detection, reset the temporary signals
                 -- and stop sending the detection pulse
                 IF count = 10000 THEN -- 10 us deteksi selesai, reset tmp signals untuk perhitungan baru
-                    trig <= '0';
+                    trigger <= '0';
                     sendDetec <= '0';
                     count <= 0;
                     tmpMSB0 <= "0000";
                     temp_MSB1 <= "0000";
                 ELSE
-                    trig <= '1';
+                    trigger <= '1';
                     count <= count + 1;
                 END IF;
             -- If we're not in the detection phase, start measuring the distance
